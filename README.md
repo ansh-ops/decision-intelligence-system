@@ -20,6 +20,10 @@ Python, Pandas, scikit-learn, SHAP, MLflow (optional), Streamlit
 - Risk segmentation buckets
 - Decision summary for business stakeholders
 
+![UI](assets/ui.png)
+![Explainability](assets/explainability.png)
+
+
 ## Run Locally
 ```bash
 git clone <your-repo-url>
