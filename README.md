@@ -21,7 +21,7 @@ Python, Pandas, scikit-learn, SHAP, MLflow (optional), Streamlit
 - Decision summary for business stakeholders
 
 ![UI](assets/ui.png)
-![Explainability](assets/explainability.png)
+![Explainability](assets/explanability.png)
 
 
 ## Run Locally
