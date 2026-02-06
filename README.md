@@ -1,4 +1,5 @@
 # Autonomous Decision Intelligence System (Bring-Your-Own-Dataset)
+![UI](assets/ui.png)
 
 A Streamlit app + ML pipeline that runs end-to-end analysis on any tabular binary-classification dataset:
 EDA → preprocessing → model selection → evaluation → explainability → risk segmentation → decision summary.
@@ -20,7 +21,6 @@ Python, Pandas, scikit-learn, SHAP, MLflow (optional), Streamlit
 - Risk segmentation buckets
 - Decision summary for business stakeholders
 
-![UI](assets/ui.png)
 ![Explainability](assets/explanability.png)
 
 
