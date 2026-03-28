@@ -1,79 +1,42 @@
 class DecisionAgent:
-    """
-    Synthesizes modeling results, explainability, segmentation,
-    and error analysis into a decision-focused report.
-
-    This agent does NOT perform modeling.
-    It translates results into actionable insights.
-    """
-
     def __init__(self, llm=None):
-        self.llm = llm  # kept for future extension, unused for now
+        self.llm = llm
 
     def run(
         self,
         task_type: str,
         modeling_best: dict,
         overall_metrics: dict,
-        segment_summary: list | None,
-        explainability: list | None,
+        segment_summary,
+        explainability,
         error_analysis: dict,
     ) -> dict:
 
-        # --------------------------------------------------
-        # Model summary
-        # --------------------------------------------------
-        model_selected = modeling_best.get("model_name")
+        # ✅ Your run_modeling stores best model name under "model"
+        model_selected = (
+            modeling_best.get("model")
+            or modeling_best.get("model_name")
+            or modeling_best.get("selected_model")
+            or "Unknown"
+        )
 
-        cv_perf = modeling_best.get("cv_performance", {})
+        cv_perf = {
+            "primary_metric": modeling_best.get("primary_metric"),
+            "cv_mean": modeling_best.get("cv_mean"),
+            "cv_std": modeling_best.get("cv_std"),
+        }
+        cv_perf = {k: v for k, v in cv_perf.items() if v is not None}
+
         fit_metrics = modeling_best.get("fit_metrics", {})
 
-        # --------------------------------------------------
-        # Explainability (TOP drivers)
-        # --------------------------------------------------
-        top_features = []
+        top_features = (explainability or [])[:5] if isinstance(explainability, list) else []
 
-        if explainability and isinstance(explainability, list):
-            top_features = explainability[:5]  # top 5 global drivers
-
-        top_explanations = {
-            "top_features": top_features
-        }
-
-        # --------------------------------------------------
-        # Risk segmentation (classification only)
-        # --------------------------------------------------
-        risk_summary = segment_summary if segment_summary else []
-
-        # --------------------------------------------------
-        # Limitations (honest + aligned with pipeline)
-        # --------------------------------------------------
-        limitations = [
-            "Explainability reflects global feature importance, not individual predictions.",
-            "One-hot encoding can expand feature space for high-cardinality categoricals.",
-            "Metrics are evaluated on a held-out test set but assume stable data distribution."
-        ]
-
-        # --------------------------------------------------
-        # Recommended next steps
-        # --------------------------------------------------
-        next_steps = [
-            "Incorporate cost-sensitive or profit-based threshold optimization.",
-            "Evaluate PR-AUC and calibration for imbalanced classification.",
-            "Monitor feature drift and retrain periodically."
-        ]
-
-        # --------------------------------------------------
-        # Final decision report
-        # --------------------------------------------------
         return {
             "model_selected": model_selected,
             "cv_performance": cv_perf,
             "fit_metrics": fit_metrics,
             "overall_metrics": overall_metrics,
-            "risk_segmentation_summary": risk_summary,
-            "top_explanations": top_explanations,
-            "error_analysis": error_analysis,
-            "limitations": limitations,
-            "recommended_next_steps": next_steps,
+            "risk_segmentation_summary": segment_summary or [],
+            "top_explanations": {"top_features": top_features},
+            "error_analysis": error_analysis or {},
         }

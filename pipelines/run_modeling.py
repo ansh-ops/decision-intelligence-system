@@ -9,7 +9,7 @@ def _select_best_model(model_results):
     return best
 
 
-def run_modeling(df, target, task_type, stats):
+def run_modeling(df, target, task_type, stats, policy: dict | None = None):
     X = df.drop(columns=[target])
     y = df[target]
 
@@ -18,7 +18,12 @@ def run_modeling(df, target, task_type, stats):
     feature_agent = FeatureAgent()
     feature_info = feature_agent.run(num_feats, cat_feats, stats)
 
-    modeling_agent = ModelingAgent(task_type)
+    policy = policy or {}
+    modeling_agent = ModelingAgent(
+        task_type,
+        model_candidates=policy.get("model_candidates"),
+        primary_metric=policy.get("primary_metric"),
+    )
     model_results = modeling_agent.run(X, y, preprocessor)
 
     best = _select_best_model(model_results)
@@ -36,6 +41,7 @@ def run_modeling(df, target, task_type, stats):
 
     return {
         "features": feature_info,
+        "policy": policy,
         "leaderboard": leaderboard,
         "best_model": {
             "model": best["model"],

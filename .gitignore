@@ -1,14 +1,21 @@
+# macOS / editor noise
+.DS_Store
+__pycache__/
+*.pyc
+*.swp
 
-# MLflow
+# Runtime outputs
 mlruns/
 artifacts/
+uploads/
+memory_index/
 *.pkl
 *.joblib
 
+# Local generated docs
+project_interview_summary.pdf
+project_interview_summary.txt
 
-# MLflow
-mlruns/
-artifacts/
-*.pkl
-*.joblib
-
+# Frontend build artifacts
+frontend/.next/
+frontend/node_modules/

@@ -19,15 +19,17 @@ from sklearn.metrics import (
 
 
 class ModelingAgent:
-    def __init__(self, task_type: str):
+    def __init__(self, task_type: str, model_candidates: list[str] | None = None, primary_metric: str | None = None):
         self.task_type = task_type
+        self.model_candidates = model_candidates
+        self.primary_metric = primary_metric
 
     # --------------------------------------------------
     # Model registry
     # --------------------------------------------------
     def _get_models(self):
         if self.task_type == "binary_classification":
-            return {
+            models = {
                 "logistic": LogisticRegression(max_iter=2000),
                 "rf": RandomForestClassifier(
                     n_estimators=300,
@@ -36,7 +38,7 @@ class ModelingAgent:
             }
 
         elif self.task_type == "regression":
-            return {
+            models = {
                 "linear": LinearRegression(),
                 "rf": RandomForestRegressor(
                     n_estimators=300,
@@ -49,10 +51,20 @@ class ModelingAgent:
                 f"Unsupported task_type: {self.task_type}"
             )
 
+        if not self.model_candidates:
+            return models
+
+        filtered = {
+            name: model for name, model in models.items() if name in set(self.model_candidates)
+        }
+        return filtered or models
+
     # --------------------------------------------------
     # Primary metric
     # --------------------------------------------------
     def _primary_scoring(self):
+        if self.primary_metric:
+            return self.primary_metric
         if self.task_type == "binary_classification":
             return "roc_auc"
         elif self.task_type == "regression":
