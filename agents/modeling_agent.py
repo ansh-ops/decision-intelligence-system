@@ -3,8 +3,22 @@ import mlflow
 import mlflow.sklearn
 
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.linear_model import (
+    LogisticRegression,
+    LinearRegression,
+    Ridge,
+    Lasso,
+    ElasticNet,
+)
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    RandomForestRegressor,
+    ExtraTreesClassifier,
+    ExtraTreesRegressor,
+)
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC, SVR
 from sklearn.model_selection import (
     StratifiedKFold,
     KFold,
@@ -16,6 +30,11 @@ from sklearn.metrics import (
     r2_score,
     mean_squared_error
 )
+
+try:
+    from xgboost import XGBClassifier
+except Exception:
+    XGBClassifier = None
 
 
 class ModelingAgent:
@@ -35,15 +54,50 @@ class ModelingAgent:
                     n_estimators=300,
                     random_state=42,
                 ),
+                "extra_trees": ExtraTreesClassifier(
+                    n_estimators=300,
+                    random_state=42,
+                ),
+                "svc": SVC(
+                    kernel="rbf",
+                    probability=True,
+                    random_state=42,
+                ),
+                "decision_tree": DecisionTreeClassifier(
+                    random_state=42,
+                    max_depth=8,
+                ),
+                "knn": KNeighborsClassifier(
+                    n_neighbors=7,
+                ),
             }
+
+            if XGBClassifier is not None:
+                models["xgboost"] = XGBClassifier(
+                    n_estimators=300,
+                    max_depth=6,
+                    learning_rate=0.05,
+                    subsample=0.9,
+                    colsample_bytree=0.9,
+                    random_state=42,
+                    eval_metric="logloss",
+                )
 
         elif self.task_type == "regression":
             models = {
                 "linear": LinearRegression(),
+                "ridge": Ridge(alpha=1.0),
+                "lasso": Lasso(alpha=0.001, max_iter=5000),
+                "elastic_net": ElasticNet(alpha=0.001, l1_ratio=0.5, max_iter=5000),
                 "rf": RandomForestRegressor(
                     n_estimators=300,
                     random_state=42,
                 ),
+                "extra_trees": ExtraTreesRegressor(
+                    n_estimators=300,
+                    random_state=42,
+                ),
+                "svr": SVR(kernel="rbf"),
             }
 
         else:

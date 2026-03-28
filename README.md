@@ -166,6 +166,29 @@ To compare the modes fairly, run the same dataset through all three modes and lo
 - explainability stability
 - final recommendation differences
 
+### Quick Benchmark Script
+
+You can benchmark the three modes locally with:
+
+```bash
+python scripts/compare_modes.py datasets/telco_churn.csv --target Churn
+```
+
+Optional flags:
+
+- `--modes deterministic agentic adaptive`
+- `--output artifacts/mode_comparison.json`
+
+The script reports:
+
+- runtime per mode
+- recommended model
+- selection policy
+- threshold and threshold metric
+- overall metrics
+- top features
+- AI summary
+
 ## Local Setup
 
 ### Backend

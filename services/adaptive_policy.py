@@ -28,7 +28,8 @@ Rules:
 - For binary classification, primary_metric must be either "roc_auc" or "f1".
 - For regression, primary_metric must be "r2".
 - threshold_metric only matters for binary classification.
-- model_candidates may only contain "logistic", "rf", or "linear".
+- model_candidates may only contain supported model ids such as "logistic", "rf", "extra_trees",
+  "svc", "decision_tree", "knn", "xgboost", "linear", "ridge", "lasso", "elastic_net", or "svr".
 
 Context:
 {json.dumps({
@@ -61,7 +62,7 @@ def _heuristic_policy(dataset_profile: dict, task_type: str, target: str) -> dic
                 "policy_name": "imbalance_aware_policy",
                 "primary_metric": "f1",
                 "threshold_metric": "f1",
-                "model_candidates": ["logistic", "rf"],
+                "model_candidates": ["logistic", "rf", "extra_trees", "svc", "decision_tree", "knn", "xgboost"],
                 "reasoning": (
                     f"The target '{target}' is materially imbalanced, so the policy optimizes for F1 "
                     "and keeps both a linear and non-linear classifier in the candidate set."
@@ -74,7 +75,7 @@ def _heuristic_policy(dataset_profile: dict, task_type: str, target: str) -> dic
                 "policy_name": "interpretable_small_data_policy",
                 "primary_metric": "roc_auc",
                 "threshold_metric": "balanced_accuracy",
-                "model_candidates": ["logistic", "rf"],
+                "model_candidates": ["logistic", "rf", "extra_trees", "decision_tree", "knn"],
                 "reasoning": (
                     f"The dataset for '{target}' is moderate in size, so the policy starts with ROC-AUC "
                     "and favors interpretable baselines while still checking a random forest."
@@ -86,7 +87,7 @@ def _heuristic_policy(dataset_profile: dict, task_type: str, target: str) -> dic
             "policy_name": "balanced_classification_policy",
             "primary_metric": "roc_auc",
             "threshold_metric": "balanced_accuracy",
-            "model_candidates": ["logistic", "rf"],
+            "model_candidates": ["logistic", "rf", "extra_trees", "svc", "decision_tree", "knn", "xgboost"],
             "reasoning": (
                 "The dataset appears reasonably stable for a broad classification search, so ROC-AUC "
                 "is used for model ranking and balanced accuracy guides thresholding."
@@ -98,7 +99,7 @@ def _heuristic_policy(dataset_profile: dict, task_type: str, target: str) -> dic
         "policy_name": "regression_performance_policy",
         "primary_metric": "r2",
         "threshold_metric": None,
-        "model_candidates": ["linear", "rf"],
+        "model_candidates": ["linear", "ridge", "lasso", "elastic_net", "rf", "extra_trees", "svr"],
         "reasoning": (
             f"The target '{target}' is treated as regression, so the policy compares linear and "
             "random-forest regressors using R2."
@@ -107,7 +108,20 @@ def _heuristic_policy(dataset_profile: dict, task_type: str, target: str) -> dic
 
 
 def _normalize_policy(policy: dict, task_type: str) -> dict | None:
-    allowed_models = {"logistic", "rf", "linear"}
+    allowed_models = {
+        "logistic",
+        "rf",
+        "extra_trees",
+        "svc",
+        "decision_tree",
+        "knn",
+        "xgboost",
+        "linear",
+        "ridge",
+        "lasso",
+        "elastic_net",
+        "svr",
+    }
     model_candidates = [
         str(model) for model in policy.get("model_candidates", []) if str(model) in allowed_models
     ]
