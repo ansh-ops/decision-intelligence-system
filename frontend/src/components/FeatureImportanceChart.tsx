@@ -9,24 +9,21 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-type FeatureRow = {
-  feature: string;
-  importance: number;
-};
+import type { FeatureImportanceRow } from "../lib/types";
 
 type FeatureImportanceChartProps = {
-  features: FeatureRow[];
+  features: FeatureImportanceRow[];
 };
 
 export default function FeatureImportanceChart({
   features,
 }: FeatureImportanceChartProps) {
   const data = (features || [])
+    .filter((f) => f.feature && typeof f.importance === "number")
     .slice(0, 10)
     .map((f) => ({
-      feature: f.feature,
-      importance: Number(f.importance?.toFixed(4)),
+      feature: f.feature || "Unknown feature",
+      importance: Number((f.importance || 0).toFixed(4)),
     }))
     .reverse();
 

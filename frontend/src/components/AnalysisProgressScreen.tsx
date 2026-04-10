@@ -11,6 +11,13 @@ function prettyStage(stage?: string | null) {
   return stage.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function detailText(value: unknown, fallback: string) {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  return fallback;
+}
+
 export default function AnalysisProgressScreen({ run }: AnalysisProgressScreenProps) {
   const events = Array.isArray(run.events) ? run.events : [];
   const modelEvents = events.filter((event) => event?.stage === "model_evaluated");
@@ -99,12 +106,12 @@ export default function AnalysisProgressScreen({ run }: AnalysisProgressScreenPr
                   </div>
                 ) : (
                   modelEvents.map((event, index) => (
-                    <div key={`${event.details?.model || "model"}-${index}`} className="rounded-2xl bg-emerald-50 p-4">
+                    <div key={`${detailText(event.details?.model, "model")}-${index}`} className="rounded-2xl bg-emerald-50 p-4">
                       <p className="font-semibold text-emerald-900">
-                        {event.details?.model || "Model pipeline"}
+                        {detailText(event.details?.model, "Model pipeline")}
                       </p>
                       <p className="mt-2 text-sm text-emerald-800">
-                        CV Mean: {event.details?.cv_mean ?? "N/A"} | CV Std: {event.details?.cv_std ?? "N/A"}
+                        CV Mean: {detailText(event.details?.cv_mean, "N/A")} | CV Std: {detailText(event.details?.cv_std, "N/A")}
                       </p>
                     </div>
                   ))
