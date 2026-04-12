@@ -1,5 +1,4 @@
 import numpy as np
-import shap
 
 
 class ExplainabilityAgent:
@@ -13,6 +12,8 @@ class ExplainabilityAgent:
         self.max_background_samples = max_background_samples
 
     def run(self, pipeline, X, task_type: str):
+        import shap
+
         # --------------------------------------------------
         # Validate pipeline
         # --------------------------------------------------

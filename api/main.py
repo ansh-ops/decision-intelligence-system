@@ -1,4 +1,5 @@
 import shutil
+import os
 from pathlib import Path
 from dataclasses import asdict
 
@@ -14,9 +15,28 @@ app = FastAPI(title="Autonomous Decision Intelligence API")
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
+
+def _allowed_origins() -> list[str]:
+    origins = {
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    }
+
+    frontend_url = os.getenv("FRONTEND_URL")
+    if frontend_url:
+        origins.add(frontend_url.rstrip("/"))
+
+    extra_origins = os.getenv("FRONTEND_URLS", "")
+    for origin in extra_origins.split(","):
+        cleaned = origin.strip().rstrip("/")
+        if cleaned:
+            origins.add(cleaned)
+
+    return sorted(origins)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

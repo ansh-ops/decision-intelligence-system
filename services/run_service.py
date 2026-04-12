@@ -1,14 +1,8 @@
 import uuid
 from pathlib import Path
 from typing import Any
+
 from orchestrator.state import PipelineState
-from pipelines.run_analysis import run_pipeline
-from agents.planner import PlannerAgent
-from core.validation import validate_tool_arguments
-from orchestrator.tool_dispatcher import dispatch_tool
-from services.ai_enrichment import build_ai_enrichment
-from services.adaptive_policy import build_adaptive_policy
-from services.llm_client import get_llm_client
 from services.artifact_store import load_run_state, save_run_state
 from dataclasses import asdict
 
@@ -55,6 +49,8 @@ def _analysis_progress_event(state: PipelineState, event: dict[str, Any]) -> Non
 
 
 def _finalize_completed_run(state: PipelineState, output: dict[str, Any]) -> None:
+    from services.ai_enrichment import build_ai_enrichment
+
     output["ai"] = build_ai_enrichment(output)
     state.result = output
     state.artifacts["run_pipeline_output"] = output
@@ -123,6 +119,8 @@ def _enrich_tool_arguments(state: PipelineState, tool_name: str, arguments: dict
 
 
 def _execute_deterministic_run(state: PipelineState) -> PipelineState:
+    from pipelines.run_analysis import run_pipeline
+
     _append_event(
         state,
         "queued",
@@ -140,6 +138,12 @@ def _execute_deterministic_run(state: PipelineState) -> PipelineState:
 
 
 def _execute_agentic_run(state: PipelineState) -> PipelineState:
+    from agents.planner import PlannerAgent
+    from core.validation import validate_tool_arguments
+    from orchestrator.tool_dispatcher import dispatch_tool
+    from pipelines.run_analysis import run_pipeline
+    from services.llm_client import get_llm_client
+
     _append_event(
         state,
         "agentic_boot",
@@ -204,6 +208,9 @@ def _execute_agentic_run(state: PipelineState) -> PipelineState:
 
 
 def _execute_adaptive_run(state: PipelineState) -> PipelineState:
+    from pipelines.run_analysis import run_pipeline
+    from services.adaptive_policy import build_adaptive_policy
+
     _append_event(
         state,
         "adaptive_boot",
