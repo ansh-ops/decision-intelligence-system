@@ -9,6 +9,8 @@ mlruns/
 artifacts/
 uploads/
 memory_index/
+runtime/
+mlflow.db
 *.pkl
 *.joblib
 

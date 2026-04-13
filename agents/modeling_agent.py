@@ -1,6 +1,8 @@
 import numpy as np
 import mlflow
 import mlflow.sklearn
+from mlflow.tracking import MlflowClient
+from pathlib import Path
 
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import (
@@ -124,6 +126,23 @@ class ModelingAgent:
         elif self.task_type == "regression":
             return "r2"
 
+    def _configure_mlflow(self, experiment_name: str) -> None:
+        runtime_dir = Path("runtime") / "mlflow"
+        artifact_root = runtime_dir / "artifacts"
+        runtime_dir.mkdir(parents=True, exist_ok=True)
+        artifact_root.mkdir(parents=True, exist_ok=True)
+
+        db_path = runtime_dir / "mlflow.db"
+        mlflow.set_tracking_uri(f"sqlite:///{db_path.resolve()}")
+
+        client = MlflowClient()
+        experiment = client.get_experiment_by_name(experiment_name)
+        if experiment is None:
+            client.create_experiment(
+                experiment_name,
+                artifact_location=(artifact_root / experiment_name).resolve().as_uri(),
+            )
+
     # --------------------------------------------------
     # Fit-time metrics
     # --------------------------------------------------
@@ -152,6 +171,7 @@ class ModelingAgent:
         preprocessor,
         experiment_name="decision_intelligence",
     ):
+        self._configure_mlflow(experiment_name)
         mlflow.set_experiment(experiment_name)
 
         scoring = self._primary_scoring()
